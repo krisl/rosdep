@@ -287,7 +287,7 @@ class AptInstaller(PackageManagerInstaller):
         version = output.splitlines()[0].split(b' ')[1].decode()
         return ['apt-get {}'.format(version)]
 
-    def get_install_command(self, resolved, interactive=True, reinstall=False, quiet=False):
+    def get_install_command(self, resolved, interactive=True, reinstall=False, quiet=False, oneshot=[]):
         packages = self.get_packages_to_install(resolved, reinstall=reinstall)
         if not packages:
             return []
@@ -302,6 +302,11 @@ class AptInstaller(PackageManagerInstaller):
         for p in _iterate_packages(packages, reinstall):
             (packages_virtual if isinstance(p, list) else packages_single).append(p)
         # sort to make the output deterministic
-        commands_single = [self.elevate_priv(base_cmd + sorted(packages_single))]
+        if 'apt' in oneshot:
+            # sort to make the output deterministic
+            commands_single = [self.elevate_priv(base_cmd + sorted(packages_single))]
+        else:
+            commands_single = [self.elevate_priv(base_cmd + [p]) for p in sorted(packages_single)]
+
         commands_virtual = [[self.elevate_priv(base_cmd + [p]) for p in providers] for providers in packages_virtual]
         return commands_single + commands_virtual
