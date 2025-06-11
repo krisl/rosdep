@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "rosdep2"
-version = "0.25.1.5a2"
+version = "0.25.1.5a3"
 # same version as in:
 # - src/rosdep2/_version.py
 # - stdeb.cfg
