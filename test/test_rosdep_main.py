@@ -207,6 +207,23 @@ class TestRosdepMain(unittest.TestCase):
                 ]
                 lines = stdout.getvalue().splitlines()
                 assert set(lines) == set(expected), lines
+            with fakeout() as b:
+                rosdep_main([
+                    'install', '-s', '-i',
+                    '--one-shot', "apt",
+                    '--os', 'ubuntu:lucid',
+                    '--rosdistro', 'fuerte',
+                    '--from-paths', catkin_tree
+                ] + cmd_extras)
+                stdout, stderr = b
+                # the output is sorted in ascending order
+                expected = [
+                    '#[apt] Installation commands:',
+                    '  sudo -H apt-get install libboost1.40-all-dev libcurl4-openssl-dev'
+                    ' libeigen3-dev libltdl-dev libtinyxml-dev libtool ros-fuerte-catkin',
+                ]
+                lines = stdout.getvalue().splitlines()
+                assert set(lines) == set(expected), lines
         except SystemExit:
             assert False, 'system exit occurred: ' + b[1].getvalue()
         try:
