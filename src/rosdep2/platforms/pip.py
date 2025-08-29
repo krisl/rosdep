@@ -30,6 +30,7 @@
 import os
 import subprocess
 import sys
+import re
 
 from configparser import ConfigParser
 from pathlib import Path
@@ -156,10 +157,15 @@ def pip_detect(pkgs, exec_fn=None):
         fallback_to_pip_show = True
     pkg_list = exec_fn(pip_cmd + ['freeze']).split('\n')
 
+    # normalise all the package names first
+    def canonicalize_name(name):
+        return re.sub(r"[-_.]+", "-", name).lower()
+    pkgs = [canonicalize_name(p) for p in pkgs]
+
     ret_list = []
     for pkg in pkg_list:
         pkg_row = pkg.split('==')
-        if pkg_row[0] in pkgs:
+        if canonicalize_name(pkg_row[0]) in pkgs:
             ret_list.append(pkg_row[0])
 
     # Try to detect with the return code of `pip show`.
